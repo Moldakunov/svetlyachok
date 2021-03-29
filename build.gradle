@@ -52,5 +52,5 @@ test {
 }
 
 bootJar {
-    mainClassName = 'kg.softech.TesApplication'
+    mainClassName = 'kg.svetlyachok.TesApplication'
 }
