@@ -51,7 +51,7 @@ public class SitemapController {
 
         HttpGet request =
             new HttpGet(
-                mainURL + "getSiteMap?baseUrl=https://www.emin.kg/product/&storeId=" + storeId);
+                mainURL + "getSiteMap?baseUrl=http://www.svetlyachok.kg/product/&storeId=" + storeId);
 
         CloseableHttpResponse response = closeableHttpClient.execute(request);
         HttpEntity entity = response.getEntity();

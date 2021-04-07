@@ -15,7 +15,7 @@ public class AdminPanelController {
 
     @RequestMapping("/fishkAdmin")
     public String loginAdmin(Model model) {
-        model.addAttribute("title", "ADMIN EMINKG");
+        model.addAttribute("title", "ADMIN Светлячок");
         model.addAttribute("adminForm", new Admin());
         return "loginAdmin";
     }
