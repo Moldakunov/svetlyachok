@@ -2,7 +2,7 @@ package kg.svetlyachok.config.globalvariable;
 
 public class GlobalVar {
 
-  public static int storeId = 111;
+  public static int storeId = 171;
 
   //    public static String mainURL="http://web.imd.kg:8080/";
   public static String mainURL = "http://212.2.230.77:8080/";
