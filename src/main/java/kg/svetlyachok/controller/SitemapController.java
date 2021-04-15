@@ -31,41 +31,35 @@ public class SitemapController {
   @GetMapping("/sitemap.xml")
   @ResponseBody
   public FileSystemResource getSitemap(HttpServletResponse responseFirst) {
-    FileOutputStream fos;
-
     Path file = Paths.get(SITEMAP);
     BasicFileAttributes attributes;
 
     try {
-      attributes = Files.readAttributes(file, BasicFileAttributes.class);
+      // обязательная проверка на существование файла, без него раньше сыпались ошибки
+      if (!file.toFile().exists()) {
+        generateSitemap();
+      } else {
+        // получаем атрибуты файла (дата изменения, дата последнего доступа к файлу и т.д.)
+        attributes = Files.readAttributes(file, BasicFileAttributes.class);
 
-      FileTime lastModifiedTime = attributes.lastModifiedTime();
-      LocalDateTime modifiedTime =
-          LocalDateTime.ofInstant(lastModifiedTime.toInstant(), ZoneId.systemDefault());
+        // но нас интересует только дата изменения файла
+        FileTime lastModifiedTime = attributes.lastModifiedTime();
 
-      LocalDateTime now = LocalDateTime.now();
+        // получаем читабельную и понятную нам дату изменения
+        LocalDateTime modifiedTime =
+            LocalDateTime.ofInstant(lastModifiedTime.toInstant(), ZoneId.systemDefault());
 
-      if (modifiedTime.plusMinutes(10).isBefore(now)) {
-        // Получение сайтмэп
-        CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+        // нужно еще текущее время для дальнейшего сравнивания с временем выше
+        LocalDateTime now = LocalDateTime.now();
 
-        HttpGet request =
-            new HttpGet(
-                mainURL + "getSiteMap?baseUrl=https://www.svetlyachok.kg/product/&storeId=" + storeId);
+        // логика для обновления файла каждые 10 минут
+        if (modifiedTime.plusMinutes(10).isBefore(now)) {
+          generateSitemap();
 
-        CloseableHttpResponse response = closeableHttpClient.execute(request);
-        HttpEntity entity = response.getEntity();
-
-        // Перезаписываем уже существующий файл, т.к. он уже устарел
-        // флаг false означает перезапись файла
-        fos = new FileOutputStream(SITEMAP, false);
-        fos.write(EntityUtils.toByteArray(entity));
-        fos.flush();
-        fos.close();
-
-        System.out.println("о, 10 минут прошли, ГЕНЕРИМ новый sitemap!!!");
-      } else if (modifiedTime.plusMinutes(10).isAfter(now)) {
-        System.out.println("еще не прошли 10 минут, так что довольствуйся тем, что есть дорогой");
+          System.out.println("о, 10 минут прошли, ГЕНЕРИМ новый sitemap!!!");
+        } else if (modifiedTime.plusMinutes(10).isAfter(now)) {
+          System.out.println("еще не прошли 10 минут, так что довольствуйся тем, что есть дорогой");
+        }
       }
     } catch (IOException e) {
       System.err.println(e);
@@ -74,5 +68,27 @@ public class SitemapController {
     responseFirst.setContentType("application/xml");
     //        return new FileSystemResource(new File("C:\\Users\\Dosmir\\Desktop\\sitemap.xml"));
     return new FileSystemResource(new File(SITEMAP));
+  }
+
+  // получаем от сервера уже подготовленный под наши требования сайтмэп
+  // и создаем (в случае, если его еще генерили)
+  // или перезаписываем его новыми данными
+  public static void generateSitemap() throws IOException {
+    FileOutputStream fos;
+    CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+
+    HttpGet request =
+        new HttpGet(
+            mainURL + "getSiteMap?baseUrl=https://www.svetlyachok.kg/product/&storeId=" + storeId);
+
+    CloseableHttpResponse response = closeableHttpClient.execute(request);
+    HttpEntity entity = response.getEntity();
+
+    // Перезаписываем уже существующий файл, т.к. он уже устарел или создаем новый файл
+    // флаг false означает перезапись файла
+    fos = new FileOutputStream(SITEMAP, false);
+    fos.write(EntityUtils.toByteArray(entity));
+    fos.flush();
+    fos.close();
   }
 }
