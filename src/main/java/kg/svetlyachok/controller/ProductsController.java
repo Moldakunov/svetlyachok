@@ -197,7 +197,7 @@ public class ProductsController {
       String response;
       StringBuilder builder = new StringBuilder();
       Gson gson = new GsonBuilder().create();
-      URL url = new URL(GlobalVar.mainURL + "getProductBySeoUrl?"+GlobalVar.storeId+"&seoUrl=" + seoUrl);
+      URL url = new URL(GlobalVar.mainURL + "getProductBySeoUrl?storeId="+GlobalVar.storeId+"&seoUrl=" + seoUrl);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       BufferedReader reader =
           new BufferedReader(new InputStreamReader(connection.getInputStream()));
